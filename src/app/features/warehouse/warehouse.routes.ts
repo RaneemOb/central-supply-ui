@@ -15,11 +15,5 @@ export const WAREHOUSE_ROUTES: Routes = [
         m => m.WarehouseAddComponent
       ),
   },
-  {
-    path: ':id/items',
-    loadComponent: () =>
-      import('./warehouse-detail/warehouse-detail.component').then(
-        m => m.WarehouseDetailComponent
-      ),
-  },
+
 ];

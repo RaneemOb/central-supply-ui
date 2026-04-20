@@ -23,4 +23,7 @@ export class WarehouseService {
     return this.api.get<Warehouse[]>('warehouse/GetAllWarehouses');
   }
 
+  getExportExcel(): Observable<Blob> {
+    return this.api.getBlob('warehouse/export');
+  }
 }

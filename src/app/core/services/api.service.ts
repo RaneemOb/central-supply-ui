@@ -58,6 +58,17 @@ export class ApiService {
   }
 
   /**
+   * GET request for blob downloads
+   */
+  getBlob(endpoint: string): Observable<Blob> {
+    const headers = this.getAuthHeaders();
+    return this.http.get(`${this.baseUrl}/${endpoint}`, {
+      headers,
+      responseType: 'blob'
+    }).pipe(timeout(this.requestTimeout), catchError(this.handleError));
+  }
+
+  /**
    * POST request
    */
   post<T>(endpoint: string, body: any): Observable<T> {
@@ -92,15 +103,16 @@ export class ApiService {
   }
 
   /**
-   * DELETE request with text response
+   * DELETE request for text responses
    */
-  deleteText(endpoint: string, body?: any): Observable<string> {
+  deleteText(endpoint: string, body?: any): Observable<any> {
     const headers = this.getAuthHeaders();
+    headers.set('Content-Type', 'application/json');
     return this.http.request('DELETE', `${this.baseUrl}/${endpoint}`, {
       headers,
       body,
       responseType: 'text'
-    }).pipe(timeout(this.requestTimeout), catchError(this.handleTextError));
+    }).pipe(timeout(this.requestTimeout), catchError(this.handleError)) as Observable<string>;
   }
 
   /**
@@ -138,41 +150,6 @@ export class ApiService {
     }
 
     console.error('HttpError:', {
-      status: error.status,
-      message: errorMessage,
-      error: error.error,
-      statusText: error.statusText,
-    });
-
-    return throwError(() => ({
-      status: error.status,
-      message: errorMessage,
-      statusText: error.statusText,
-      error: error.error,
-    }));
-  }
-
-  /**
-   * Error handling for text responses
-   */
-  private handleTextError(error: HttpErrorResponse) {
-    let errorMessage = 'An error occurred';
-
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Server-side error - for text responses, the error might be in the response body
-      if (typeof error.error === 'string' && error.error.trim()) {
-        errorMessage = error.error;
-      } else if (error.message) {
-        errorMessage = error.message;
-      } else {
-        errorMessage = `HTTP ${error.status}: ${error.statusText}`;
-      }
-    }
-
-    console.error('Text HttpError:', {
       status: error.status,
       message: errorMessage,
       error: error.error,

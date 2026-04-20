@@ -37,7 +37,10 @@ import { ErrorService } from '../../../core/services/error.service';
             (click)="deleteSelectedWarehouses()">
             🗑️ Delete Selected ({{ selectedWarehouses().length }})
           </button>
-          <button class="btn btn-secondary" [disabled]="true">
+          <button 
+            class="btn btn-secondary"
+            [disabled]="loading()"
+            (click)="exportToExcel()">
             📥 Export to Excel
           </button>
         </div>
@@ -554,4 +557,28 @@ export class WarehouseListComponent implements OnInit {
       }
     });
   }
+ exportToExcel(): void {
+    console.log('Export button clicked!');
+    this.warehouseService.getExportExcel().subscribe({
+    next: (response: Blob) => {
+      console.log('Export response received:', response);
+      const blob = new Blob([response], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Warehouses.xlsx';
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      this.errorService.showSuccess('Export completed successfully');
+    },
+    error: (err) => {
+      console.error('Export failed', err);
+      this.errorService.showError('Failed to export warehouses');
+    }
+  });
+}
 }
